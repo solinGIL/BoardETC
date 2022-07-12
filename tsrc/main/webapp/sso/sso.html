@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>AtMessenger</title>
+	<script type="text/javascript" src="../common/js/json/json2.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.js"></script>
+<script type="text/javascript">
+function getId()
+{
+	var rtn = "";
+	
+	rtn = initSSO();
+	
+	return rtn;
+}
+
+function initSSO()
+{
+	var result = "";
+	var rtn = "";
+	
+	$.ajax
+	({
+		type : "GET",
+		url : "http://127.0.0.1:29998/GetData",
+		async : false,
+		
+		success : function(data)
+		{
+			var JWTToken = JSON.parse(data.data).jwt;
+			var userId = JSON.parse(data.data).secUserId;
+			
+			result = RequestData(JWTToken, userId);
+		}
+	});
+	
+	if(result == "FAIL")
+	{
+		rtn = "{\"msg\": {\"SYSTEM_USER_ID\" : \"\" }, \"status\" : \"FAIL\"}";
+	}
+	else
+	{
+		rtn = "{\"msg\": {\"SYSTEM_USER_ID\" : \"" + result + "\" }, \"status\" : \"SUCC\"}";
+	}
+		
+	return rtn;
+}
+
+function RequestData(JWTToken,userId)
+{
+	var rtn = "FAIL";
+	
+	var param = "{\"SYSTEM_USER_ID\" : \""+ userId +"\"}";
+	
+	$.ajaxSetup
+	({
+		headers: {"Authorization":"Bearer " + JWTToken}
+	});
+	
+	$.ajax
+	({
+		url : "http://test-eam.mifs.mil/eam/api/v1/user/userEnc.ks",
+		data : param,
+		type : "POST",
+		async : false,
+		timeout : 5000,
+		dataType : "JSON",
+		contentType : "application/json; charset=UTF-8",
+		
+		success : function(data)
+		{
+			rtn = data.msg.SYSTEM_USER_ID;
+		},
+		error : function(e)
+		{
+			rtn = "FAIL";
+		}
+	});
+	
+	return rtn;
+}
+
+function test()
+{
+	var result = "wjdrkfl27";
+	
+	var str1 = "{\"msg\": {\"SYSTEM_USER_ID\" : \"\" }, \"status\" : \"FAIL\"}";
+	var str2 = "{\"msg\": {\"SYSTEM_USER_ID\" : \"" + result + "\" }, \"status\" : \"SUCC\"}";;
+	
+	alert(str1);
+	alert(str2);
+}
+
+
+</script>
+</head>
+<body onload="javascript:test();">
+
+</body>
+</html>
